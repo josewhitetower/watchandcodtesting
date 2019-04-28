@@ -1,0 +1,48 @@
+<body>
+  <script src="../tinytest.js"></script>
+  <script>
+    function forEach(array, cb, configurableObject) {
+      var forEachCb = cb;
+      if (configurableObject) {
+        forEachCb = cb.bind(configurableObject)
+      }
+      for (let index = 0; index < array.length; index++) {
+        forEachCb(array[index], index, array, configurableObject);
+      }
+    }
+
+    tests({
+
+      'It should run the cb function array.length times': function () {
+        var counter = 0;
+        forEach([1, 2, 3], function (params) {
+          counter++;
+        })
+
+        eq(counter, 3)
+      },
+
+      'It should pass in the ith element as the first arg to the cb': function () {
+        forEach([1], function (number) {
+          eq(number, 1)
+        })
+      },
+      'It should pass in the ith as the second arg of the cb': function () {
+        forEach([1], function (number, index) {
+          eq(index, 0)
+        })
+      },
+      'It should accept a configurable this object': function () {
+        var testArray = [1, 2, 3]
+        forEach(testArray, function (number, index, originalArray) {
+          eq(this.description, 'Configurable this object')
+          eq(testArray, originalArray)
+        }, {
+          description: 'Configurable this object'
+        })
+      },
+
+    });
+  </script>
+
+</body>

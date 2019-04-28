@@ -1,0 +1,78 @@
+<body>
+  <script src="../tinytest.js"></script>
+  <script>
+    function map(array, cb, configurableObject) {
+      var returnArray = [];
+      var filterCB = cb;
+      if (configurableObject) {
+        filterCB = cb.bind(configurableObject)
+      }
+      for (let index = 0; index < array.length; index++) {
+        if (index in array) {
+          returnArray[index] = filterCB(array[index], index, array)
+
+        }
+      }
+
+      return returnArray;
+
+    }
+
+    tests({
+
+      'It should run the cb function array.length times': function () {
+        var counter = 0;
+        map([1, 2, 3], function (params) {
+          counter++;
+        })
+
+        eq(counter, 3)
+      },
+
+      'It should pass in the ith element as the first arg to the cb': function () {
+        map([1], function (number) {
+          eq(number, 1)
+        })
+      },
+      'It should pass in the ith as the second arg of the cb': function () {
+        map([1], function (number, index) {
+          eq(index, 0)
+        })
+      },
+      'It should pass in the ith as the second arg of the cb': function () {
+        var testArray = [1, 2, 3]
+
+        map(testArray, function (number, index, originalArray) {
+          eq(testArray, originalArray)
+        })
+      },
+      'It should accept a configurable this object': function () {
+        var testArray = [1, 2, 3]
+        map(testArray, function (number, index, originalArray) {
+          eq(this.description, 'Configurable this object')
+        }, {
+          description: 'Configurable this object'
+        })
+      },
+      'It should return a new different array': function () {
+        var testArray = [1, 2, 0, , undefined];
+        var filterdArray = map(testArray, function (element) {
+          return {
+            double: element * 2
+          };
+        });
+        console.log(filterdArray)
+        eq(Array.isArray(filterdArray), true)
+        //eq(testArray.length, filterdArray.length)
+        eq(testArray !== filterdArray, true)
+        //fail()
+      },
+      // 'It should return a new array where cb() is true': function () {
+      //   fail()
+
+      // }
+
+    });
+  </script>
+
+</body>

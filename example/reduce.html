@@ -1,0 +1,150 @@
+<body>
+  <script src="../tinytest.js"></script>
+  <script>
+    function reduce(array, cb, inintalValue) {
+
+      var startingIndex = 0;
+      var resultSoFar = inintalValue;
+
+
+      //Detect if no initalValue
+      if (arguments.length < 3) {
+
+        //Array empty, throw TypeError
+
+        if (Object.keys(array).length === 0) {
+          throw new TypeError('Recude an empty array with no initial value')
+        }
+
+
+        if (Object.keys(array).length === 1) {
+          return array[Object.keys(array)[0]];
+        }
+
+        // Skipp hole
+
+
+        while (startingIndex in array === false && startingIndex < array.length) {
+          startingIndex++;
+        }
+
+
+        resultSoFar = array[startingIndex]
+        startingIndex++;
+      } else {
+        if (Object.keys(array).length === 0) {
+          return inintalValue;
+        }
+      }
+
+      for (let index = startingIndex; index < array.length; index++) {
+        if (index in array) {
+          resultSoFar = cb(resultSoFar, array[index], index, array);
+        }
+      }
+
+      return resultSoFar;
+
+    }
+
+    tests({
+      'If initialValue, callback should run array.length times': function () {
+        var counter = 0;
+        reduce([1], function () {
+          counter++;
+        }, 0)
+
+        eq(counter, 1)
+
+      },
+      'If no initialValue, callback should run array.length - 1 times': function () {
+        var counter = 0;
+        reduce([1], function () {
+          counter++;
+        })
+
+        eq(counter, 0)
+
+      },
+
+      'If initial Value, previousValue sould start with initialVale': function () {
+        reduce([1], function (previousValue) {
+          eq(previousValue, 0)
+        }, 0)
+      },
+      'If inintalValue, currentValue shpuld start with array[0]': function () {
+        reduce([1], function (previousValue, currentValue) {
+          eq(currentValue, 1)
+        }, 0)
+      },
+      'If initialValue, callback will start at index 0': function () {
+        reduce([1], function (previousValue, currentValue, currentIndex) {
+          eq(currentIndex, 0)
+        }, 0)
+      },
+
+      'If no initialValue, previousValue should start with array[0]': function () {
+        reduce([1, 2], function (previousValue) {
+          eq(previousValue, 1)
+        })
+        //fail()
+      },
+      'If no initialValue, currentValue should start with array[1]': function () {
+        reduce([1, 2], function (previousValue, currentValue) {
+          eq(currentValue, 2)
+        })
+      },
+      'If no initaíalValue, callback will start at index 1': function () {
+        reduce([1, 2], function (previousValue, currentValue, currentIndex) {
+          eq(currentIndex, 1)
+        })
+      },
+
+      'If initialValue, and array is mepty, return initialValue without calling callback': function () {
+        var reducedValue = reduce([], function () {}, 0)
+        eq(reducedValue, 0)
+      },
+      'If no initialValue and aray has only one eleement, it should be returned without calling callback': function () {
+        var reducedValue = reduce([1], function () {})
+        eq(reducedValue, 1)
+      },
+
+      'It should actually reduce': function () {
+        var reducedValue = reduce([1, 2, 3], function (previousValue, currentValue) {
+          return previousValue + currentValue;
+        }, 0)
+        eq(reducedValue, 6)
+      },
+      'It should exclude holes': function () {
+        var reducedValue = reduce([, 1, 2, 3, ], function (previousValue, currentValue) {
+          return previousValue + currentValue;
+        }, 0)
+        eq(reducedValue, 6)
+      },
+      'It should exclude holes if no initialValue': function () {
+        var reducedValue = reduce([, 1, 2, 3, ], function (previousValue, currentValue) {
+          return previousValue + currentValue;
+        })
+        eq(reducedValue, 6)
+      },
+      'If array is empty, throw Error': function () {
+        var isTypeErr = false;
+        try {
+          reduce([], function () {})
+        } catch (error) {
+          isTypeErr = (error instanceof TypeError);
+        }
+        eq(isTypeErr, true)
+      },
+      'It should pass in array as fourth element to callback': function () {
+        var testArray = [1, 2];
+        reduce(testArray, function (previousValue, currentValue, currentIndex, arrayToReduce) {
+          eq(testArray, arrayToReduce)
+        })
+      },
+
+
+    });
+  </script>
+
+</body>
