@@ -1,0 +1,83 @@
+<body>
+  <script src="../tinytest.js"></script>
+  <script>
+    function findIndex(array, cb, configurableObject) {
+      var returnValue = -1;
+      var findCB = cb;
+      if (configurableObject) {
+        findCB = cb.bind(configurableObject)
+      }
+      for (let index = 0; index < array.length; index++) {
+        if (findCB(array[index], index, array)) {
+          returnValue = index;
+          break;
+        }
+      }
+
+      return returnValue;
+
+    }
+
+    tests({
+
+      'It should run the cb function array.length times': function () {
+        var counter = 0;
+        findIndex([1, 2, 3], function (params) {
+          counter++;
+        })
+
+        eq(counter, 3)
+      },
+
+      'It should pass in the ith element as the first arg to the cb': function () {
+        findIndex([1], function (number) {
+          eq(number, 1)
+        })
+      },
+      'It should pass in the ith as the second arg of the cb': function () {
+        findIndex([1], function (number, index) {
+          eq(index, 0)
+        })
+      },
+      'It should pass in the ith as the second arg of the cb': function () {
+        var testArray = [1, 2, 3]
+
+        findIndex(testArray, function (number, index, originalArray) {
+          eq(testArray, originalArray)
+        })
+      },
+      'It should accept a configurable this object': function () {
+        var testArray = [1, 2, 3]
+        findIndex(testArray, function (number, index, originalArray) {
+          eq(this.description, 'Configurable this object')
+        }, {
+          description: 'Configurable this object'
+        })
+      },
+      'It should return a undefined if not found': function () {
+        var testArray = [1, 2, 3];
+        var found = findIndex(testArray, function (element) {
+          return element > 4;
+        });
+        eq(found, -1)
+      },
+      'It should return the value of the first element in the array': function () {
+        var testArray = [1, 2, 3, 4];
+        var found = findIndex(testArray, function (element) {
+          return element % 2 !== 0;
+        });
+        eq(found, 0)
+      },
+      'Elements that are appended to the array after the call to findIndex begins will not be visited by callback.': function () {
+        var testArray = [1, 2, 3, 4];
+        var found = findIndex(testArray, function (number, index, originalArray) {
+          return number === 5
+        });
+        testArray.push(5)
+        eq(found, -1)
+      }
+
+    });
+  </script>
+
+</body>
